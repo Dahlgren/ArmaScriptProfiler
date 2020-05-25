@@ -79,7 +79,11 @@ set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES PREFIX "")
 set_target_properties(${INTERCEPT_PLUGIN_NAME} PROPERTIES FOLDER ArmaScriptProfiler)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-	set_source_files_properties(hooks.s PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp")
+	if(USE_64BIT_BUILD)
+		set_source_files_properties(hooks.s PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp -fPIC")
+	else()
+		set_source_files_properties(hooks.s PROPERTIES COMPILE_FLAGS "-x assembler-with-cpp -fPIC -m32")
+	endif()
 	add_compile_definitions(__linux__)
 	list(REMOVE_ITEM INTERCEPT_ASP_SOURCES "${CMAKE_SOURCE_DIR}/src/hooks.asm")
 
@@ -92,15 +96,13 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 		"-fpermissive"
 		"-static-libgcc"
 		"-static-libstdc++"
-		"-march=i686"
-		"-m32"
 		"-Wno-ignored-attributes"
 		"-static"
 		"$<$<CONFIG:Release>:-ffunction-sections>"
 		"$<$<CONFIG:Release>:-fdata-sections>"
 
 	)
-	target_link_options(${INTERCEPT_PLUGIN_NAME} PRIVATE "-m32" "-fPIC" "-static" "-static-libgcc" "-static-libstdc++"
+	target_link_options(${INTERCEPT_PLUGIN_NAME} PRIVATE "-fPIC"
 	"$<$<CONFIG:Release>:-Wl,--gc-sections>"
 	"$<$<CONFIG:Release>:-Wl,--strip-all>"
 	) 

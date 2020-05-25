@@ -1,0 +1,1 @@
+option(USE_64BIT_BUILD ON)
